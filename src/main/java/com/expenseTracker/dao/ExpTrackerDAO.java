@@ -12,15 +12,15 @@ public class ExpTrackerDAO {
 
     private static final String SELECT_ALL_CAT = "SELECT * FROM category";
     private static final String INSERT_CAT = "INSERT INTO category (id,title) VALUES(?,?)";
-    private static final String INSERT_EXP = "INSERT INTO expenses (id,description,amount,date,category) VALUES(?,?,?,?,?)";
+    private static final String INSERT_EXP = "INSERT INTO expenses (eid, description, amount, category, date) VALUES(?,?,?,?,?)";
     private static final String SELECT_ALL_EXP = "SELECT * FROM expenses";
 
     public int createCat(Category cat) throws SQLException{
         try(
             Connection conn = DatabaseConnection.getDBConnection();
             PreparedStatement stmt = conn.prepareStatement(INSERT_CAT,Statement.RETURN_GENERATED_KEYS);
-        ){ 
-            stmt.setInt(1, 0);
+        ){
+            stmt.setInt(1, cat.getId());
             stmt.setString(2, cat.getTitle());
 
             int rowAffected = stmt.executeUpdate();
@@ -64,11 +64,12 @@ public class ExpTrackerDAO {
             Connection conn = DatabaseConnection.getDBConnection();
             PreparedStatement stmt = conn.prepareStatement(INSERT_EXP,Statement.RETURN_GENERATED_KEYS);
         ){ 
-            stmt.setInt(1, 0);
+            stmt.setInt(1, exp.getId());
             stmt.setString(2, exp.getDescription());
             stmt.setInt(3, exp.getAmount());
-            stmt.setDate(4, Date.valueOf(exp.getDate()));
-            stmt.setString(5, exp.getCategory());
+            stmt.setString(4, exp.getCategory());
+            stmt.setDate(5, Date.valueOf(exp.getDate()));
+
 
             int rowAffected = stmt.executeUpdate();
 
@@ -89,7 +90,7 @@ public class ExpTrackerDAO {
 
     private Expenses getExpRow(ResultSet rs) throws SQLException {
         Expenses exp = new Expenses();
-        exp.setId(rs.getInt("id"));
+        exp.setId(rs.getInt("eid"));
         exp.setDescription(rs.getString("description"));
         exp.setAmount(rs.getInt("amount"));
         exp.setDate(rs.getDate("date").toLocalDate());

@@ -189,6 +189,8 @@ class ExpGUI extends JFrame {
 
     private void intializeComponents(){
 
+        expDAO = new ExpTrackerDAO();
+
         setTitle("Expense");
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
