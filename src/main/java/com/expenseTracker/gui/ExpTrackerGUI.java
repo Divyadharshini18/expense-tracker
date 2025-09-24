@@ -1,5 +1,6 @@
 package com.expenseTracker.gui;
 
+import java.time.LocalDate;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.List;
@@ -141,10 +142,23 @@ class CatGUI extends JFrame {
     }
 
     private void setupListeners(){
-        // addBtn.addActionListener((e) -> { addCat(); });
+        addBtn.addActionListener((e) -> { addCat(); });
         // updateBtn.addActionListener((e) -> { updateCat(); });
         // deleteBtn.addActionListener((e) -> { deleteCat(); });
         // refreshBtn.addActionListener((e) -> { refreshCat(); });
+    }
+
+    private void addCat(){
+        String Title = title.getText().trim();
+        try{
+            Category cat = new Category(Title);
+            catDAO.createCat(cat);
+            JOptionPane.showMessageDialog(this, "Category added successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            loadCats();
+            clearForm();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error adding category: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void loadCats() {
@@ -164,6 +178,10 @@ class CatGUI extends JFrame {
         }
     }
 
+    private void clearForm(){
+        title.setText("");
+    }
+
 }
 
 class ExpGUI extends JFrame {
@@ -172,13 +190,14 @@ class ExpGUI extends JFrame {
 
     private JTextArea description;
     private JTextField amount;
+    private JTextField category;
+    private JTextField date;
     private JButton addBtn;
     private JButton updateBtn;
     private JButton deleteBtn;
     private JButton refreshBtn;
     private DefaultTableModel expTableModel;
     private JTable expTable;
-    private JComboBox<String> categoryCombo;
 
     public ExpGUI(){
         intializeComponents();
@@ -198,8 +217,8 @@ class ExpGUI extends JFrame {
 
         description = new JTextArea(3, 20);
         amount = new JTextField(20);
-        categoryCombo = new JComboBox<>();
-
+        category = new JTextField(20);
+        date = new JTextField(10);
         addBtn = new JButton("Add");
         updateBtn = new JButton("Update");
         deleteBtn = new JButton("Delete");
@@ -248,7 +267,14 @@ class ExpGUI extends JFrame {
         gbc.gridy = 2;
         inputPanel.add(new JLabel("Category:"), gbc);
         gbc.gridx = 1;
-        inputPanel.add(categoryCombo, gbc);
+        inputPanel.add(category, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        inputPanel.add(new JLabel("Date (yyyy-MM-dd):"), gbc);
+        gbc.gridx = 1;
+        inputPanel.add(date, gbc);
+
 
         JPanel btnPanel = new JPanel(new FlowLayout());
         btnPanel.add(addBtn);
@@ -271,10 +297,31 @@ class ExpGUI extends JFrame {
     }
 
     private void setupListeners(){
-        // addBtn.addActionListener((e) -> { addExp(); });
+        addBtn.addActionListener((e) -> { addExp(); });
         // updateBtn.addActionListener((e) -> { updateExp(); });
         // deleteBtn.addActionListener((e) -> { deleteExp(); });
         // refreshBtn.addActionListener((e) -> { refreshExp(); });
+    }
+
+    private void addExp(){
+        String desc = description.getText().trim();
+        int amt = Integer.parseInt(amount.getText().trim());  
+        String cat = category.getText().trim();  
+        String dateText = date.getText().trim();   
+        LocalDate date = LocalDate.parse(dateText);
+
+        try{
+            Expenses exp = new Expenses();
+            exp.setDescription(desc);
+            exp.setAmount(amt);
+            exp.setCategory(cat);
+            exp.setDate(date);
+            expDAO.createExp(exp);
+            loadExps();
+            clearForm();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error adding category: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void loadExps() {
@@ -292,6 +339,13 @@ class ExpGUI extends JFrame {
             Object[] rowData = {exp.getId(), exp.getDescription(), exp.getAmount(), exp.getDate(), exp.getCategory()};
             expTableModel.addRow(rowData);
         }
+    }
+
+    private void clearForm() {
+        description.setText("");
+        amount.setText("");
+        category.setText("");
+        date.setText("");
     }
     
 }

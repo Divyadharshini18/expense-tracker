@@ -3,17 +3,28 @@ package com.expenseTracker.dao;
 import com.expenseTracker.util.DatabaseConnection;
 import java.util.List;
 
+import javax.xml.transform.Result;
+
 import com.expenseTracker.model.Category;
 import com.expenseTracker.model.Expenses;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ExpTrackerDAO {
 
     private static final String SELECT_ALL_CAT = "SELECT * FROM category";
+    private static final String SELECT_ALL_EXP = "SELECT * FROM expenses";
     private static final String INSERT_CAT = "INSERT INTO category (id,title) VALUES(?,?)";
     private static final String INSERT_EXP = "INSERT INTO expenses (eid, description, amount, category, date) VALUES(?,?,?,?,?)";
-    private static final String SELECT_ALL_EXP = "SELECT * FROM expenses";
+    private static final String DELETE_CAT = "DELETE FROM todos WHERE id = ?";
+    private static final String DELETE_EXP = "DELETE FROM expenses WHERE eid = ?";
+    private static final String UPDATE_CAT = "UPDATE category SET title = ? WHERE id = ?";
+    private static final String UPDATE_EXP = "UPDATE expenses SET description = ?, amount = ?, category = ?, date = ? WHERE eid = ?";
+    private static final String SELECT_CAT_ID = "SELECT * FROM category WHERE id = ?";
+    private static final String SELECT_EXP_ID = "SELECT * FROM expenses WHERE eid = ?";
+    private static final String FILTER_EXP = "SELECT * FROM expenses WHERE category = ?";
+
 
     public int createCat(Category cat) throws SQLException{
         try(
@@ -39,6 +50,46 @@ public class ExpTrackerDAO {
             }
         }
     }
+
+    public Category getCatByID (int catId) throws SQLException {
+        try (
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_CAT_ID);
+        ) {
+            stmt.setInt(1, catId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return getRow(rs);
+                }
+            }
+        }
+        return null; // no category found
+    }
+
+    public boolean updateCat(Category cat) throws SQLException {
+        try (
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(UPDATE_CAT)
+        ) {
+            stmt.setString(1, cat.getTitle());  
+            stmt.setInt(2, cat.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    private boolean deleteCat(Category cat) throws SQLException {
+        try (
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(DELETE_CAT)
+        ) {
+            stmt.setInt(1, cat.getId());
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
 
     private Category getRow(ResultSet rs) throws SQLException {
         Category cat = new Category();
@@ -86,6 +137,63 @@ public class ExpTrackerDAO {
                 }
             }
         }
+    }
+
+    private Expenses getExpByID (int expId) throws SQLException {
+        try (
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_EXP_ID);
+        ) {
+            stmt.setInt(1, expId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return getExpRow(rs);
+                }
+            }
+        }
+        return null; // no expenses found
+    }
+
+    public boolean updateExp(Expenses exp) throws SQLException {
+        try (
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(UPDATE_EXP)
+        ) {
+            stmt.setString(0, exp.getDescription());
+            stmt.setInt(2, exp.getAmount());
+            stmt.setString(3, exp.getCategory());
+            stmt.setDate(4, Date.valueOf(exp.getDate()));
+            stmt.setInt(5, exp.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    private boolean deleteExp(Expenses exp) throws SQLException {
+        try (
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(DELETE_EXP)
+        ) {
+            stmt.setInt(1, exp.getId());
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    public List<Expenses> filterExp(String category) throws SQLException{
+        List<Expenses> exps=new ArrayList<>();
+        try(
+            Connection conn = DatabaseConnection.getDBConnection();
+            PreparedStatement stmt = conn.prepareStatement(FILTER_EXP);
+        ){
+            stmt.setString(1, category);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                exps.add(getExpRow(rs));
+            }
+        }
+        return exps;
     }
 
     private Expenses getExpRow(ResultSet rs) throws SQLException {
