@@ -14,7 +14,7 @@ public class ExpTrackerDAO {
     private static final String SELECT_ALL_EXP = "SELECT * FROM expenses";
     private static final String INSERT_CAT = "INSERT INTO category (id,title) VALUES(?,?)";
     private static final String INSERT_EXP = "INSERT INTO expenses (eid, description, amount, category, date) VALUES(?,?,?,?,?)";
-    private static final String DELETE_CAT = "DELETE FROM todos WHERE id = ?";
+    private static final String DELETE_CAT = "DELETE FROM category WHERE id = ?";
     private static final String DELETE_EXP = "DELETE FROM expenses WHERE eid = ?";
     private static final String UPDATE_CAT = "UPDATE category SET title = ? WHERE id = ?";
     private static final String UPDATE_EXP = "UPDATE expenses SET description = ?, amount = ?, date = ?, category = ? WHERE eid = ?";
@@ -76,7 +76,7 @@ public class ExpTrackerDAO {
         }
     }
 
-    private boolean deleteCat(Category cat) throws SQLException {
+    public boolean deleteCat(Category cat) throws SQLException {
         try (
             Connection conn = DatabaseConnection.getDBConnection();
             PreparedStatement stmt = conn.prepareStatement(DELETE_CAT)

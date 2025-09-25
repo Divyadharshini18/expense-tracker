@@ -144,7 +144,7 @@ class CatGUI extends JFrame {
     private void setupListeners(){
         addBtn.addActionListener((e) -> { addCat(); });
         updateBtn.addActionListener((e) -> { updateCat(); });
-        // deleteBtn.addActionListener((e) -> { deleteCat(); });
+        deleteBtn.addActionListener((e) -> { deleteCat(); });
         // refreshBtn.addActionListener((e) -> { refreshCat(); });
     }
 
@@ -183,6 +183,26 @@ class CatGUI extends JFrame {
         }catch(SQLException e){
             JOptionPane.showMessageDialog(this, "Error updating category: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void deleteCat(){
+        int row = catTable.getSelectedRow();
+        if(row == -1){
+            JOptionPane.showMessageDialog(this, "Select a category to delete", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int catId = (int) catTableModel.getValueAt(row, 0);
+        try{
+            Category cat = new Category();
+            cat.setId(catId);
+            catDAO.deleteCat(cat);
+            JOptionPane.showMessageDialog(this, "Category deleted successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            loadCats();
+            clearForm();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error deleting category: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }   
     }
 
     private void loadCats() {
