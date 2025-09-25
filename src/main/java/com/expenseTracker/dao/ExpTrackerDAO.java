@@ -60,7 +60,7 @@ public class ExpTrackerDAO {
                 }
             }
         }
-        return null; // no category found
+        return null;
     }
 
     public boolean updateCat(Category cat) throws SQLException {
@@ -116,7 +116,6 @@ public class ExpTrackerDAO {
             stmt.setInt(3, exp.getAmount());
             stmt.setString(4, exp.getCategory());
             stmt.setDate(5, Date.valueOf(exp.getDate()));
-
 
             int rowAffected = stmt.executeUpdate();
 

@@ -255,6 +255,7 @@ class ExpGUI extends JFrame {
 
     private JTextArea description;
     private JTextField amount;
+    private JComboBox<String> categoryCombo;
     private JTextField category;
     private JTextField date;
     private JButton addBtn;
@@ -263,6 +264,7 @@ class ExpGUI extends JFrame {
     private JButton refreshBtn;
     private DefaultTableModel expTableModel;
     private JTable expTable;
+
 
     public ExpGUI(){
         intializeComponents();
@@ -291,6 +293,7 @@ class ExpGUI extends JFrame {
         updateBtn = new JButton("Update");
         deleteBtn = new JButton("Delete");
         refreshBtn = new JButton("Refresh");
+        categoryCombo = new JComboBox<>();
 
         String[] colNames = {"ID", "Description", "Amount", "Date", "Category"};
         expTableModel = new DefaultTableModel(colNames, 0){
@@ -309,6 +312,8 @@ class ExpGUI extends JFrame {
                 }
              }
         );
+
+        loadCategories();
     }
 
     private void setupLayout(){
@@ -336,7 +341,7 @@ class ExpGUI extends JFrame {
         gbc.gridy = 2;
         inputPanel.add(new JLabel("Category:"), gbc);
         gbc.gridx = 1;
-        inputPanel.add(category, gbc);
+        inputPanel.add(categoryCombo, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
@@ -372,11 +377,23 @@ class ExpGUI extends JFrame {
         refreshBtn.addActionListener((e) -> { refreshExp(); });
     }
 
+    private void loadCategories() {
+    try {
+        List<Category> cats = expDAO.getAllCat();
+        categoryCombo.removeAllItems();
+        for (Category cat : cats) {
+            categoryCombo.addItem(cat.getTitle());
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading categories: " + e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
     private void addExp(){
         String desc = description.getText().trim();
-        int amt = Integer.parseInt(amount.getText().trim());  
-        String cat = category.getText().trim();  
+        int amt = Integer.parseInt(amount.getText().trim()); 
         String dateText = date.getText().trim();   
+        String cat = (String) categoryCombo.getSelectedItem();
         LocalDate date = LocalDate.parse(dateText);
 
         try{
@@ -405,7 +422,7 @@ class ExpGUI extends JFrame {
         int expId = (int) expTableModel.getValueAt(row, 0);
         String desc = description.getText().trim();
         int amt = Integer.parseInt(amount.getText().trim());
-        String cat = category.getText().trim();
+        String cat = (String) categoryCombo.getSelectedItem();
         String dateStr = date.getText().trim();
         LocalDate datePass = LocalDate.parse(dateStr);
 
