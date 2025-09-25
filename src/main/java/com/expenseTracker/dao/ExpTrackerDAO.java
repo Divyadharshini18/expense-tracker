@@ -166,7 +166,7 @@ public class ExpTrackerDAO {
         }
     }
 
-    private boolean deleteExp(Expenses exp) throws SQLException {
+    public boolean deleteExp(Expenses exp) throws SQLException {
         try (
             Connection conn = DatabaseConnection.getDBConnection();
             PreparedStatement stmt = conn.prepareStatement(DELETE_EXP)
