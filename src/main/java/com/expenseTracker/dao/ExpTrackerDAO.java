@@ -3,12 +3,9 @@ package com.expenseTracker.dao;
 import com.expenseTracker.util.DatabaseConnection;
 import java.util.List;
 
-import javax.xml.transform.Result;
-
 import com.expenseTracker.model.Category;
 import com.expenseTracker.model.Expenses;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ExpTrackerDAO {
@@ -20,7 +17,7 @@ public class ExpTrackerDAO {
     private static final String DELETE_CAT = "DELETE FROM todos WHERE id = ?";
     private static final String DELETE_EXP = "DELETE FROM expenses WHERE eid = ?";
     private static final String UPDATE_CAT = "UPDATE category SET title = ? WHERE id = ?";
-    private static final String UPDATE_EXP = "UPDATE expenses SET description = ?, amount = ?, category = ?, date = ? WHERE eid = ?";
+    private static final String UPDATE_EXP = "UPDATE expenses SET description = ?, amount = ?, date = ?, category = ? WHERE eid = ?";
     private static final String SELECT_CAT_ID = "SELECT * FROM category WHERE id = ?";
     private static final String SELECT_EXP_ID = "SELECT * FROM expenses WHERE eid = ?";
     private static final String FILTER_EXP = "SELECT * FROM expenses WHERE category = ?";
@@ -90,7 +87,6 @@ public class ExpTrackerDAO {
         }
     }
 
-
     private Category getRow(ResultSet rs) throws SQLException {
         Category cat = new Category();
         cat.setId(rs.getInt("id"));
@@ -139,7 +135,7 @@ public class ExpTrackerDAO {
         }
     }
 
-    private Expenses getExpByID (int expId) throws SQLException {
+    public Expenses getExpByID (int expId) throws SQLException {
         try (
             Connection conn = DatabaseConnection.getDBConnection();
             PreparedStatement stmt = conn.prepareStatement(SELECT_EXP_ID);
@@ -159,10 +155,10 @@ public class ExpTrackerDAO {
             Connection conn = DatabaseConnection.getDBConnection();
             PreparedStatement stmt = conn.prepareStatement(UPDATE_EXP)
         ) {
-            stmt.setString(0, exp.getDescription());
+            stmt.setString(1, exp.getDescription());
             stmt.setInt(2, exp.getAmount());
-            stmt.setString(3, exp.getCategory());
-            stmt.setDate(4, Date.valueOf(exp.getDate()));
+            stmt.setDate(3, Date.valueOf(exp.getDate()));
+            stmt.setString(4, exp.getCategory());
             stmt.setInt(5, exp.getId());
 
             int rowsAffected = stmt.executeUpdate();

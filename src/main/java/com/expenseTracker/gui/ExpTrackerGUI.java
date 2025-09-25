@@ -29,7 +29,7 @@ public class ExpTrackerGUI extends JFrame{
 
     private void intializeComponents(){
         setTitle("Expense Tracker");
-        setSize(800, 800);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -101,7 +101,7 @@ class CatGUI extends JFrame {
         catTable.getSelectionModel().addListSelectionListener(
              (e) -> {
                 if(!e.getValueIsAdjusting()){
-                    // loadSeletedCats();
+                    loadSeletedCats();
                 }
              }
         );
@@ -143,7 +143,7 @@ class CatGUI extends JFrame {
 
     private void setupListeners(){
         addBtn.addActionListener((e) -> { addCat(); });
-        // updateBtn.addActionListener((e) -> { updateCat(); });
+        updateBtn.addActionListener((e) -> { updateCat(); });
         // deleteBtn.addActionListener((e) -> { deleteCat(); });
         // refreshBtn.addActionListener((e) -> { refreshCat(); });
     }
@@ -161,12 +161,51 @@ class CatGUI extends JFrame {
         }
     }
 
+    private void updateCat(){
+        int row = catTable.getSelectedRow();
+        if(row == -1){
+            JOptionPane.showMessageDialog(this, "Please select a category to update", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int catId = (int) catTableModel.getValueAt(row, 0);
+        String Title = title.getText().trim();
+        if (Title.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Title cannot be empty", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try{
+            Category cat = new Category(catId, Title);
+            catDAO.updateCat(cat);
+            JOptionPane.showMessageDialog(this, "Category updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            loadCats();
+            clearForm();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error updating category: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void loadCats() {
         try{
             List<Category> cats = catDAO.getAllCat();
             updateTable(cats);
         }catch(SQLException e){
             JOptionPane.showMessageDialog(this, "Error loading categories: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadSeletedCats(){
+        int row = catTable.getSelectedRow();
+        if(row != -1){
+            int catId = (int) catTableModel.getValueAt(row, 0);
+            try{
+                Category cat = catDAO.getCatByID(catId);
+                if(cat != null){
+                    title.setText(cat.getTitle());
+                }
+            }catch(SQLException e){
+                JOptionPane.showMessageDialog(this, "Error loading category: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -237,7 +276,7 @@ class ExpGUI extends JFrame {
         expTable.getSelectionModel().addListSelectionListener(
              (e) -> {
                 if(!e.getValueIsAdjusting()){
-                    // loadSeletedExps();
+                    loadSeletedExps();
                 }
              }
         );
@@ -298,7 +337,7 @@ class ExpGUI extends JFrame {
 
     private void setupListeners(){
         addBtn.addActionListener((e) -> { addExp(); });
-        // updateBtn.addActionListener((e) -> { updateExp(); });
+        updateBtn.addActionListener((e) -> { updateExp(); });
         // deleteBtn.addActionListener((e) -> { deleteExp(); });
         // refreshBtn.addActionListener((e) -> { refreshExp(); });
     }
@@ -324,12 +363,60 @@ class ExpGUI extends JFrame {
         }
     }
 
+    private void updateExp(){
+
+        int row = expTable.getSelectedRow();
+        if(row == -1){
+            JOptionPane.showMessageDialog(this, "Please select an expense to update", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int expId = (int) expTableModel.getValueAt(row, 0);
+        String desc = description.getText().trim();
+        int amt = Integer.parseInt(amount.getText().trim());
+        String cat = category.getText().trim();
+        String dateStr = date.getText().trim();
+        LocalDate datePass = LocalDate.parse(dateStr);
+
+        if (desc.isEmpty() || cat.isEmpty() || dateStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields must be filled", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try{
+            Expenses exp = new Expenses(expId, desc, amt, datePass, cat);
+            expDAO.updateExp(exp);
+            JOptionPane.showMessageDialog(this, "Expense updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            loadExps();
+            clearForm();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error updating expense: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void loadExps() {
         try{
             List<Expenses> exps = expDAO.getAllExp();
             updateTable(exps);
         }catch(SQLException e){
             JOptionPane.showMessageDialog(this, "Error loading expenses: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadSeletedExps(){
+        int row = expTable.getSelectedRow();
+        if(row!=-1){
+            int expId = (int) expTableModel.getValueAt(row, 0);
+            try{
+                Expenses exp = expDAO.getExpByID(expId);
+                if(exp!=null){
+                    description.setText(exp.getDescription());
+                    amount.setText(String.valueOf(exp.getAmount()));
+                    category.setText(exp.getCategory());
+                    date.setText(exp.getDate().toString());
+                }
+            }catch(SQLException e){
+                JOptionPane.showMessageDialog(this, "Error loading expense: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
