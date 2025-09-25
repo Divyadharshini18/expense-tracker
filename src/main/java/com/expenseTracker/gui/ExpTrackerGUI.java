@@ -1,15 +1,12 @@
 package com.expenseTracker.gui;
 
 import java.time.LocalDate;
-import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.List;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import com.expenseTracker.dao.ExpTrackerDAO;
 import com.expenseTracker.model.Category;
 import com.expenseTracker.model.Expenses;
@@ -150,7 +147,14 @@ class CatGUI extends JFrame {
     }
 
     private void addCat(){
+
         String Title = title.getText().trim();
+
+        if (Title.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Title cannot be empty", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         try{
             Category cat = new Category(Title);
             catDAO.createCat(cat);
@@ -256,6 +260,7 @@ class ExpGUI extends JFrame {
     private JTextArea description;
     private JTextField amount;
     private JComboBox<String> categoryCombo;
+    private JComboBox<String> filterCombo;
     private JTextField category;
     private JTextField date;
     private JButton addBtn;
@@ -294,6 +299,10 @@ class ExpGUI extends JFrame {
         deleteBtn = new JButton("Delete");
         refreshBtn = new JButton("Refresh");
         categoryCombo = new JComboBox<>();
+        filterCombo = new JComboBox<>();
+        loadCategories(categoryCombo);
+        loadCategories(filterCombo);
+        filterCombo.addItem("All");
 
         String[] colNames = {"ID", "Description", "Amount", "Date", "Category"};
         expTableModel = new DefaultTableModel(colNames, 0){
@@ -312,8 +321,6 @@ class ExpGUI extends JFrame {
                 }
              }
         );
-
-        loadCategories();
     }
 
     private void setupLayout(){
@@ -349,19 +356,23 @@ class ExpGUI extends JFrame {
         gbc.gridx = 1;
         inputPanel.add(date, gbc);
 
-
         JPanel btnPanel = new JPanel(new FlowLayout());
         btnPanel.add(addBtn);
         btnPanel.add(updateBtn);
         btnPanel.add(deleteBtn);
         btnPanel.add(refreshBtn);
 
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        filterPanel.add(new JLabel("Filter"));
+        filterPanel.add(filterCombo);
+
         JPanel northPanel = new JPanel(new BorderLayout());
         northPanel.add(inputPanel,BorderLayout.CENTER);
         northPanel.add(btnPanel,BorderLayout.SOUTH);
+        northPanel.add(filterPanel,BorderLayout.NORTH);
+
 
         add(northPanel,BorderLayout.NORTH);
-
         add(new JScrollPane(expTable),BorderLayout.CENTER);
 
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -375,14 +386,17 @@ class ExpGUI extends JFrame {
         updateBtn.addActionListener((e) -> { updateExp(); });
         deleteBtn.addActionListener((e) -> { deleteExp(); });
         refreshBtn.addActionListener((e) -> { refreshExp(); });
+        filterCombo.addActionListener((e) -> {
+            filterExps();
+        });
     }
 
-    private void loadCategories() {
+    private void loadCategories(JComboBox<String> CB) {
     try {
         List<Category> cats = expDAO.getAllCat();
-        categoryCombo.removeAllItems();
+        CB.removeAllItems();
         for (Category cat : cats) {
-            categoryCombo.addItem(cat.getTitle());
+            CB.addItem(cat.getTitle());
         }
     } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Error loading categories: " + e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
@@ -390,18 +404,27 @@ class ExpGUI extends JFrame {
 }
 
     private void addExp(){
+
         String desc = description.getText().trim();
-        int amt = Integer.parseInt(amount.getText().trim()); 
-        String dateText = date.getText().trim();   
+        String amountText = amount.getText().trim();
+        String dateS = date.getText().trim();
         String cat = (String) categoryCombo.getSelectedItem();
-        LocalDate date = LocalDate.parse(dateText);
+
+        if(desc.isEmpty() || dateS.isEmpty() || amountText.isEmpty()){
+            JOptionPane.showMessageDialog(this, "All fields must be filled", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         try{
+            int amt = Integer.parseInt(amountText);
+            LocalDate dateValue = LocalDate.parse(dateS);
+
             Expenses exp = new Expenses();
             exp.setDescription(desc);
             exp.setAmount(amt);
             exp.setCategory(cat);
-            exp.setDate(date);
+            exp.setDate(dateValue);
+
             expDAO.createExp(exp);
             JOptionPane.showMessageDialog(this, "Expense added successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             loadExps();
@@ -473,6 +496,21 @@ class ExpGUI extends JFrame {
             updateTable(exps);
         }catch(SQLException e){
             JOptionPane.showMessageDialog(this, "Error loading expenses: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void filterExps(){
+        String cat = (String) filterCombo.getSelectedItem();
+        try{
+            List<Expenses> exps;
+            if(cat.equals("All")){
+                exps = expDAO.getAllExp();
+            }else{
+                exps = expDAO.filterExp(cat);
+            }
+            updateTable(exps);
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error filtering expenses: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
