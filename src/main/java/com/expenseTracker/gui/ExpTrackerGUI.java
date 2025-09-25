@@ -363,8 +363,8 @@ class ExpGUI extends JFrame {
     private void setupListeners(){
         addBtn.addActionListener((e) -> { addExp(); });
         updateBtn.addActionListener((e) -> { updateExp(); });
-        // deleteBtn.addActionListener((e) -> { deleteExp(); });
-        // refreshBtn.addActionListener((e) -> { refreshExp(); });
+        deleteBtn.addActionListener((e) -> { deleteExp(); });
+        refreshBtn.addActionListener((e) -> { refreshExp(); });
     }
 
     private void addExp(){
@@ -416,6 +416,33 @@ class ExpGUI extends JFrame {
         }catch(SQLException e){
             JOptionPane.showMessageDialog(this, "Error updating expense: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void deleteExp(){
+
+        int row = expTable.getSelectedRow();
+        if(row == -1){
+            JOptionPane.showMessageDialog(this, "Select a row for deleting", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int expId = (int) expTableModel.getValueAt(row, 0);
+        try{
+            Expenses exp = new Expenses();
+            exp.setId(expId);
+            expDAO.deleteExp(exp);
+            JOptionPane.showMessageDialog(this, "Expense deleted successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            loadExps();
+            clearForm();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(this, "Error deleting expense: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+    }
+
+    private void refreshExp(){
+        loadExps();
+        clearForm();
     }
 
     private void loadExps() {
