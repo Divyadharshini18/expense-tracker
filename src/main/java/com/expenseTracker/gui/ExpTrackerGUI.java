@@ -437,7 +437,6 @@ class ExpGUI extends JFrame {
         }catch(SQLException e){
             JOptionPane.showMessageDialog(this, "Error deleting expense: "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
     }
 
     private void refreshExp(){
