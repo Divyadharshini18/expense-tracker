@@ -10,8 +10,8 @@ import java.util.ArrayList;
 
 public class ExpTrackerDAO {
 
-    private static final String SELECT_ALL_CAT = "SELECT * FROM category";
-    private static final String SELECT_ALL_EXP = "SELECT * FROM expenses";
+    private static final String SELECT_ALL_CAT = "SELECT * FROM category ORDER BY id";
+    private static final String SELECT_ALL_EXP = "SELECT * FROM expenses ORDER BY eid";
     private static final String INSERT_CAT = "INSERT INTO category (id,title) VALUES(?,?)";
     private static final String INSERT_EXP = "INSERT INTO expenses (eid, description, amount, category, date) VALUES(?,?,?,?,?)";
     private static final String DELETE_CAT = "DELETE FROM category WHERE id = ?";

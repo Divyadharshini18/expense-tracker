@@ -4,9 +4,7 @@ import java.time.LocalDate;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.*;
 import java.awt.*;
@@ -29,12 +27,15 @@ public class ExpTrackerGUI extends JFrame{
 
     private void intializeComponents(){
         setTitle("Expense Tracker");
-        setSize(800, 600);
+        setSize(700, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         catBtn = new JButton("Category");
         expBtn = new JButton("Expense");
+
+        catBtn.setPreferredSize(new Dimension(250, 60));
+        expBtn.setPreferredSize(new Dimension(250, 60));
     }
 
     private void setupLayout() {
@@ -76,7 +77,7 @@ class CatGUI extends JFrame {
     private void intializeComponents(){
 
         setTitle("Category");
-        setSize(400, 400);
+        setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -275,11 +276,14 @@ class ExpGUI extends JFrame {
         expDAO = new ExpTrackerDAO();
 
         setTitle("Expense");
-        setSize(600, 600);
+        setSize(500, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         description = new JTextArea(3, 20);
+        description.setLineWrap(true); 
+        description.setWrapStyleWord(true);
+
         amount = new JTextField(20);
         category = new JTextField(20);
         date = new JTextField(10);
@@ -314,6 +318,7 @@ class ExpGUI extends JFrame {
         JPanel inputPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -381,6 +386,7 @@ class ExpGUI extends JFrame {
             exp.setCategory(cat);
             exp.setDate(date);
             expDAO.createExp(exp);
+            JOptionPane.showMessageDialog(this, "Expense added successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             loadExps();
             clearForm();
         }catch(SQLException e){
