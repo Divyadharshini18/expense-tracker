@@ -15,6 +15,7 @@ public class ExpTrackerGUI extends JFrame{
     
     private JButton catBtn;
     private JButton expBtn;
+    private JLabel title;
 
     public ExpTrackerGUI(){
         intializeComponents();
@@ -30,6 +31,8 @@ public class ExpTrackerGUI extends JFrame{
 
         catBtn = new JButton("Category");
         expBtn = new JButton("Expense");
+        title = new JLabel("Expense Tracker", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 24));
 
         catBtn.setPreferredSize(new Dimension(250, 60));
         expBtn.setPreferredSize(new Dimension(250, 60));
@@ -37,12 +40,21 @@ public class ExpTrackerGUI extends JFrame{
 
     private void setupLayout() {
         setLayout(new BorderLayout());
-        JPanel btnPanel = new JPanel(new GridBagLayout());
+
+        JPanel body = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(20, 20, 20, 20);
-        btnPanel.add(catBtn, gbc);
-        btnPanel.add(expBtn, gbc);
-        add(btnPanel, BorderLayout.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        body.add(title, gbc);
+        
+        gbc.gridy = 1;
+        body.add(catBtn, gbc);
+
+        gbc.gridy = 2;
+        body.add(expBtn, gbc);
+
+        add(body, BorderLayout.CENTER);
     }
 
     private void setupListeners(){
